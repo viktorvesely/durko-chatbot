@@ -21,24 +21,73 @@ socket.on("new_message", () => {
         let data = response.data;
         let msgs = data.msgs;
         if (!data.update) return;
-
+        let button = false;
 
         msgs.forEach(msg => {
             if (currentMsgIndex !== null) {
+                if (msg.type === "buttons") {
+                    button = true;
+                    let btn = msg.options.btns[0];
+                    chat.message.update(currentMsgIndex, {
+                        loading: false,
+                        content: msg.value
+                    });
+                    chat.action.button({
+                        action: [
+                            {
+                                text: btn.title,
+                                value: btn.url 
+                            }
+                        ]
+                    }).then(res => {
+                        window.open(res.value);
+                    });
+                    return;
+                }
+
+
                 chat.message.update(currentMsgIndex, {
                     loading: false,
                     content: msg.value
                 });
                 currentMsgIndex = null;
             } else {
+                if (msg.type === "buttons") {
+                    button = true;
+                    let btn = msg.options.btns[0];
+                    chat.message.add({
+                        content: msg.value,
+                        human: false
+                    });
+                    chat.action.button({
+                        human: false,
+                        action: [
+                            {
+                                text: btn.title,
+                                value: btn.url 
+                            },
+                            {
+                                text: "Nie diky",
+                                value: "none"
+                            }
+                        ]
+                    }).then(res => {
+                        readQuery();
+                        if (res.value === "none") return;
+                        window.open(res.value);
+                    });
+                    return;
+                }
                 chat.message.add({
                     content: msg.value,
                     human: false  
                 });
             }
         });
-
-        readQuery();
+        
+        if (!button) {
+            readQuery();
+        }
 
     })
     .catch(function (error) {
@@ -80,6 +129,6 @@ function readQuery() {
 
 chat.message.add({
     content: 'Helo babe!'
-  }).then(function () { 
+  }).then(function () {
     readQuery();
   });
