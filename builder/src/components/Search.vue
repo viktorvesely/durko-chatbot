@@ -41,6 +41,7 @@ export default {
     border: 1px solid black;
     border-right: 0;
     height: 20%;
+    padding-bottom: 20px;
 }
 
 

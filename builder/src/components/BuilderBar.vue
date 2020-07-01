@@ -7,6 +7,16 @@
                 <div class="bubble click" @click="pipeType('text')">Klasická textová správa vhodná na rýchlu a jednoduchú odpoveď</div>
                 <div class="description">Textová správa</div>
             </div>
+            <div class="response wait">
+                <WaitIcon class="wait-icon click" @click="pipeType('wait')"></WaitIcon>
+                <div class="description">Dramatická pauza</div>
+            </div>
+            <div class="response url">
+                <div class="button click" @click="pipeType('url')">
+                    Zoberem ťa do Infoportalu
+                </div>
+                <div class="description">Webová stránka</div>
+            </div>
             <div class="response quick-responses">
                 <div class="bubbles-wrapper click" @click="pipeType('quicks')">
                     <div class="bubbles">
@@ -20,16 +30,6 @@
                     </div>
                 </div>
                 <div class="description">Rýchle odpovede</div>
-            </div>
-            <div class="response wait">
-                <WaitIcon class="wait-icon click" @click="pipeType('wait')"></WaitIcon>
-                <div class="description">Dramatická pauza</div>
-            </div>
-            <div class="response url">
-                <div class="button click" @click="pipeType('url')">
-                    Zoberem ťa do Infoportalu
-                </div>
-                <div class="description">Webová stránka</div>
             </div>
         </div>
     </div>
@@ -59,7 +59,7 @@ export default {
 <style lang="scss" scoped>
 .builder-bar {
     width: 100%;
-    height: 100%;
+    height: 100vh;
     padding: 0 10px;
     border: 1px solid black;
 }
@@ -77,7 +77,7 @@ export default {
 
 
 .bubble {
-    background-color: black;
+    background-color: #BCE4FA;
     border-radius: 15px;
     width: 100%;
     padding: 5px 15px;
@@ -128,13 +128,17 @@ export default {
     left: calc(50% - 25px);
 }
 
+.url {
+    text-align: center;
+}
 .button {
     background-color: black;
     opacity: 0.8;
     border-radius: 4px;
     color: white;
-    padding: 5px 5px;
+    padding: 6px 10px;
     font-size: 16px;
     text-align: center;
+    display: inline-block;
 }
 </style>

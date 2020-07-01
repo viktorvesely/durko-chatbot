@@ -1,12 +1,21 @@
 <template>
-  <div id="root">
-    <div id="left-screen">
-      <Search class="Search"></Search>
-      <Answer ref="Answer"></Answer>
-    </div><div id="right-screen">
-      <b-bar v-on:addResponse="addResponse"></b-bar>
-    </div>
-  </div>
+  <v-app id="root">
+    <v-container fill-width fluid ma-0 pa-0>
+      <v-row dense no-gutters>
+        <v-col lg="8" dense>
+          <v-row dense no-gutters>
+            <Search class="Search"></Search>
+          </v-row>
+          <v-row dense>
+            <Answer ref="Answer"></Answer>
+          </v-row>
+        </v-col>
+        <v-col lg="4" dense>
+          <b-bar v-on:addResponse="addResponse"></b-bar>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-app>
 </template>
 
 <script>
@@ -30,7 +39,7 @@ export default {
   }),
   methods: {
     addResponse(type) {
-      this.$refs.Answer.addResponse(type)
+      this.$refs.Answer.addResponse(type);
     }
   }
 };
@@ -57,26 +66,6 @@ p {
 
 body {
   margin: 0;
-}
-
-#root {
-  width: 100%;
-  height: 100vh;
-  max-width: 100%;
-  max-height: 100vh;
-  margin: auto;
-  overflow: hidden;
-}
-
-#left-screen {
-  float: left;
-  width: 70%;
-  height: 100%;
-}
-
-#right-screen {
-  height: 100%;
-  margin-left: 70%;
 }
 
 
