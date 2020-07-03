@@ -1,10 +1,33 @@
 <template>
-    <div class="answer">
+    <v-carousel-item>
+        <v-card class="pl-5 pt-5 pb-0 pr-5 align-self-stretch" :ref="`answerView:${breadCrumbs}`" width="100%" elevation="2" height="100%">
         <v-row dense no-gutters>
-            <v-col>
+            <v-col lg="3">
                  <h3>
-                    Odpoveď
+                    Odpoveď na
                 </h3>
+            </v-col>
+            <v-col lg="6">
+                <v-row>
+                    <v-col class="pt-2">
+                        <div style="display: inline" v-for="(b, index) in listBreadCrumbs" :key="index + 1">
+                            <a @click="redirect(index)" v-if="index < listBreadCrumbs.length - 1" class="active-link">
+                                {{ b }}
+                            </a>
+                            <a @click="redirect(index)" v-if="index === listBreadCrumbs.length - 1" class="passive-link">
+                                {{ b }}
+                            </a>
+                            <span>/</span>
+                        </div>
+                        <a @click="redirect(breadCrumbs.origin)" v-if="!!breadCrumbs.post_back" class="passive-link">
+                            test
+                        </a>
+                    </v-col>
+                </v-row>
+            </v-col>
+            <v-spacer></v-spacer>
+            <v-col lg="2" class="pt-4">
+                <v-btn color="blue" outlined text @click="saveResponse()">Uložiť</v-btn>
             </v-col>
         </v-row>
         <v-row dense no-gutters>
@@ -16,21 +39,30 @@
         </v-row>
         <v-row justify="center">
             <v-dialog v-model="dialog" max-width="800">
-                <component ref="Dialog" v-on:closeDialog="closeDialog" :is="`${currentMsg.type}-editor`"></component>
+                <component 
+                    ref="Dialog"
+                    v-on:closeDialog="closeDialog" 
+                    :is="`${currentMsg.type}-editor`"
+                    >
+                </component>
             </v-dialog>
         </v-row>
-        <v-row dense no-gutters justify="center" tag="div" class="item-wrapper" v-for="(type, index) in types" :key="type.key">
-            <v-col lg="4">
-                <component v-bind:is="typeToComponent(type.type)" :msg="type" class="item" @click.native.stop="displayDialog(type, index)">
-                </component>
-            </v-col>
-            <v-col lg="1">
-                <v-btn icon color="black" @click="removeElement(index)">
-                    <v-icon dark>mdi-delete</v-icon>
-                </v-btn>
-            </v-col>
-        </v-row>
-    </div>    
+        <div ref="Cap" class="cap">
+            <v-row dense no-gutters justify="center" tag="div" class="item-wrapper pa-2 d-flex align-stretch" v-for="(type, index) in response" :key="type.key">
+                <v-col cols="4">
+                    <component v-bind:is="typeToComponent(type.type)" :msg="type" class="item" @click.native.stop="displayDialog(type, index)">
+                    </component>
+                </v-col>
+                <v-col cols="1">
+                    <v-btn icon color="black" @click="removeElement(index)">
+                        <v-icon dark>mdi-delete</v-icon>
+                    </v-btn>
+                </v-col>
+            </v-row>
+        </div>
+        
+    </v-card> 
+    </v-carousel-item>   
 </template>
 <script>
 import TextComp from "./Text"
@@ -39,6 +71,8 @@ import URLComp from "./URL"
 import QuicksComp from "./Quicks"
 
 import CloseIcon from '../assets/close.svg'
+import { Database } from '../shared/Database.js'
+import { Bus } from '../shared/Bus.js'
 
 import TextEditor from './TextEditor'
 import WaitEditor from './WaitEditor'
@@ -55,13 +89,29 @@ function generateHexString(length) {
 
 
 export default {
+    props: ["index", "name", "isIntent", "breadCrumbs"],
     data() {
         return {
-            types: [],
+            response: [],
             dialog: false,
             currentMsg: {},
-            currentIndex: -1
+            currentIndex: -1,
+            listBreadCrumbs: []
         }
+    },
+    created() {
+        console.log(this.breadCrumbs);
+        this.listBreadCrumbs = this.breadCrumbs.split(":");
+        this.loadResponse();
+    },
+    mounted() {
+        let id = `answerView:${this.breadCrumbs}`;
+        console.log(id);
+        let view = document.getElementById(id);
+        let y = view.getBoundingClientRect().y
+        let delta = window.innerHeight - y - 15;
+        view.style.maxHeight = `${delta}px`;
+        view.style.height = `${delta}px`;
     },
     components: {
         "text-comp": TextComp,
@@ -75,6 +125,31 @@ export default {
         "quicks-editor": QuicksEditor
     },
     methods: {
+        openPostBack(postBack) {
+            // TODO 
+        },
+        loadResponse() {
+            if (this.isIntent) {
+                Database.loadResponse(this.name).then(response => {
+                    this.response = response;
+                });
+            } else  {
+                Database.loadPostback(this.breadCrumbs).then(response => {
+                    this.response = response;
+                });
+            }
+        },
+        saveResponse() {
+            if (!this.isIntent) {
+                Database.savePostback(this.breadCrumbs, this.response).then(() => {
+                     // TODO close postback and go one level higher
+                });
+            } else {
+                Database.saveResponse(this.name, this.response).then(() => {
+                    // TODO add save notification
+                });
+            }
+        },
         typeToComponent(type) {
             return `${type}-comp`;
         },
@@ -88,10 +163,10 @@ export default {
         },
         closeDialog(msg) {
             this.dialog = false;
-            this.$set(this.types, this.currentIndex, msg);
+            this.$set(this.response, this.currentIndex, msg);
         },
         removeElement(index) {
-            this.types.splice(index, 1);
+            this.response.splice(index, 1);
         },
         addResponse(type) {
             let response = {
@@ -117,23 +192,17 @@ export default {
                     response.options = [
                         {
                             title: "Možnosť 1",
-                            post_back: "option_1" 
+                            post_back: "option_0" 
                         }
                     ];
                     break;
             }
-            this.types.push(response);
+            this.response.push(response);
         }
     }
 }
 </script>
 <style lang="scss" scoped>
-.answer {
-    height: 80%;
-    width: 100%;
-    padding: 10px 15px;
-    overflow: auto;
-}
 .item-wrapper {
     text-align: center;
     margin: 20px 0;
@@ -157,4 +226,25 @@ export default {
 .item:hover {
     cursor: pointer;
 }
+
+a {
+    font-size: 16px;
+}
+
+a.active-link {
+    color: #BCE4FA !important;
+}
+
+a.passive-link {
+    color: gray;
+}
+
+a.passive-link:hover {
+    cursor: default;
+}
+
+#answerView {
+    overflow-y: auto;
+}
+
 </style>

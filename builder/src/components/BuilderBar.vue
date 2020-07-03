@@ -1,22 +1,32 @@
 <template>
-    <div class="builder-bar">
-        <h3>Skladač správ</h3>
-        <p>Tu si zvoľ, akú odpoveď má Ďurko na daný <b>intent</b> odpísať. Jednoducho klikni na žiadaný typ správy a zobrazí sa ti v odpovedi</p>
-        <div class="type-responses">
+    <v-card class="pl-5 pr-5">
+        <v-row>
+            <h3>Skladač správ</h3>
+        </v-row>
+        <v-row>
+            <p>Tu si zvoľ, akú odpoveď má Ďurko na daný <b>intent</b> odpísať. Jednoducho klikni na žiadaný typ správy a zobrazí sa ti v odpovedi</p>    
+        </v-row>
+        <v-row>
             <div class="response text">
                 <div class="bubble click" @click="pipeType('text')">Klasická textová správa vhodná na rýchlu a jednoduchú odpoveď</div>
                 <div class="description">Textová správa</div>
             </div>
+        </v-row>
+        <v-row>
             <div class="response wait">
                 <WaitIcon class="wait-icon click" @click="pipeType('wait')"></WaitIcon>
                 <div class="description">Dramatická pauza</div>
             </div>
+        </v-row>
+        <v-row>
             <div class="response url">
                 <div class="button click" @click="pipeType('url')">
                     Zoberem ťa do Infoportalu
                 </div>
                 <div class="description">Webová stránka</div>
             </div>
+        </v-row>
+        <v-row>
             <div class="response quick-responses">
                 <div class="bubbles-wrapper click" @click="pipeType('quicks')">
                     <div class="bubbles">
@@ -30,9 +40,9 @@
                     </div>
                 </div>
                 <div class="description">Rýchle odpovede</div>
-            </div>
-        </div>
-    </div>
+            </div>    
+        </v-row>
+    </v-card>
 </template>
 <script>
 import API from "../shared/API.js";
@@ -57,12 +67,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.builder-bar {
-    width: 100%;
-    height: 100vh;
-    padding: 0 10px;
-    border: 1px solid black;
-}
+
 
 
 .response {

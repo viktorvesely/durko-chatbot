@@ -1,51 +1,53 @@
 <template>
-    <div class="search-intent">
-        <h3>Zvoľ si akú odpoveď chceš editovať</h3>
-        <p>Napíš názov <b>intent</b>-u ktorý si mu pridelil(a)</p>
-        <vue-select :options='options' class="intent-widget"></vue-select>
-    </div>
+    <v-card width="100%" class="pa-5 align-self-stretch">
+        <v-row dense>
+            <v-col class="pa-0" lg="5">
+                <h3>Zvoľ si akú odpoveď chceš editovať</h3>
+            </v-col>
+            <v-col lg="5">   
+                <v-select v-model="current" dense color="#BCE4FA" :items='options' @change="selectIntent"></v-select>
+            </v-col>
+        </v-row>
+        <v-row dense>
+            <v-col class="pa-0">
+                <p>Napíš názov <b>intent</b>-u ktorý si mu pridelil(a)</p>
+            </v-col>
+        </v-row>
+    </v-card>
 </template>
 <script>
-import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 import API from "../shared/API.js";
+import { Bus } from "../shared/Bus.js";
 
 export default {
     data() {
         return {
-            options: []
+            options: [],
+            current: ""
         }
-    },
-    components: {
-        "vue-select": vSelect
     },
     methods:{
     },
     created() {
         API.getIntents().then(intents => {
             intents.forEach(intent => {
-                this.options.push(intent.name);
+                this.options.push(
+                    {
+                        value: intent.name,
+                        text: intent.name
+                    });
             });
+            this.current = intents[0].name;
+            this.selectIntent(this.current);
         });
+    },
+    methods: {
+        selectIntent(intent) {
+            Bus.$emit("loadIntent", intent);
+        }
     }
-}
+    }
 </script>
 <style lang="scss" scoped>
-
-.search-intent {
-    position: static;
-    width: 100%;
-    padding: 0 20px;
-    top: 0;
-    left: 0;
-    border: 1px solid black;
-    border-right: 0;
-    height: 20%;
-    padding-bottom: 20px;
-}
-
-
-.intent-widget {
-    max-width: 400px;
-}
 </style>

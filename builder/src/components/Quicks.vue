@@ -24,7 +24,7 @@ export default {
     font-size: 14px;
     text-align: center;
     display: inline-block;
-    margin: 0 4px;
+    margin: 4px 4px;
 }
 
 .text-response {

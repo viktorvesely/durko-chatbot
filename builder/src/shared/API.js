@@ -6,7 +6,7 @@ export default {
     getIntents() {
         if (!DEPLOYED) {
             return new Promise((resolve, reject) => {
-                resolve([{name: "knock_knock"}, {name: "request_holiday"}, {name: "get_info"}]);
+                resolve([{name: "request_holiday"}, {name: "knock_knock"}, {name: "get_info"}]);
             });
         } 
 

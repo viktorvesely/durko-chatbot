@@ -1,7 +1,7 @@
 <template>
     <v-card>
         <v-card-title>
-          <span class="headline">Webový odkaz</span>
+          <span class="headline">Rýchle odpovede</span>
         </v-card-title>
         <v-card-text>
           <v-container>
@@ -17,24 +17,29 @@
                 ></v-text-field>
                 </v-col>
             </v-row>
-            <v-row>
-            <v-col v-for="btn in btns" :key="btn.post_back" lg="4">
+            <v-row class="justify-center" lg="12">
+            <v-col class="ma-4" v-for="(btn, index) in btns" :key="btn.post_back" lg="3">
                 <v-row>
                     <v-text-field
-                    label="Odpoveď"
+                    label="Text odpovede"
                     v-model="btn.title"
                     required
                     spellcheck="false"
                     ></v-text-field>
                 </v-row>
                 <v-row>
-                    <v-btn color="blue" outlined @click="editQuick(btn.post_back)">Upraviť odpoveď</v-btn>
+                    <v-btn color="blue" width="190" outlined @click="editQuick(btn)">Upraviť reakciu</v-btn>
+                </v-row>
+                <v-row class="mt-2" v-if="index > 0">
+                    <v-btn width="190" outlined color="red" text @click="remove(index)">Zmazať reakciu</v-btn>
                 </v-row>
             </v-col>
-            <v-col>
-                <v-btn color="blue">
-                    <v-icon color="white">mdi-plus</v-icon>
-                </v-btn>
+            <v-col lg="3" justify-center align-center>
+                <v-row fill-height>
+                    <v-btn color="blue" class="ma-12" outlined @click="addQuick">
+                        <v-icon color="blue">mdi-plus</v-icon>
+                    </v-btn>
+                </v-row>
             </v-col>
             </v-row>
           </v-container>
@@ -66,11 +71,29 @@ export default {
             this.value = "";
             this.btns = [];
         },
+        copyButtons(btns) {
+            let copy = [];
+            btns.forEach(btn => {
+                copy.push({
+                    title: btn.title,
+                    post_back: btn.post_back
+                })      
+            });
+            return copy;
+        },
         display(msg) {
             this.value = msg.value;
-            this.btns = msg.options;
-
+            this.btns = this.copyButtons(msg.options);
             this.msg = msg;
+        },
+        remove(index) {
+            this.btns.splice(index, 1);
+        },
+        addQuick() {
+            this.btns.push({
+                title: `Možnosť ${this.btns.length + 1}`,
+                post_back: `option_${this.btns.length}`
+            });
         },
         editQuick(post_back) {
             console.log(post_back);
