@@ -16,8 +16,9 @@
                 height="100%"
                 light
                 v-model="currentResponse"
+                style="max-height: 100%"
               >
-                <Answer v-for="(response, index) in responses" :index="index" :name="response" :breadCrumbs="generateName(index)" :isIntent="index === 0" :key="generateName(index)"></Answer>
+                <Answer v-for="(response, index) in responses" :index="index" :parent="index === 0 ? null : names[index - 1]" :name="names[index]" :isIntent="index === 0" :key="names[index]"></Answer>
               </v-carousel>
             </v-col>
           </v-row>
@@ -48,28 +49,39 @@ export default {
   created() {
     Bus.$on("loadIntent", intent => {
       this.responses = [];
-      this.breadCrumbs = [];
-      this.breadCrumbs.push(intent);
+      this.names = [];
       this.responses.push(intent);
+      this.names.push(this.generateName(0));
+      this.currentResponse = 0;
+    });
+
+    Bus.$on("removeLast", () => {
+      let index = this.responses.length - 1;
+      this.responses.splice(index, 1);
+      this.names.splice(index, 1);
+      this.currentResponse--;
     });
 
     Bus.$on("openPostBack", postBack => {
-      this.openPostBack(postBack);
+      this.responses.push(postBack);
+      this.names.push(this.generateName(this.responses.length - 1));
+      this.currentResponse++;
     });
   },
   data: () => ({
     currentResponse: 0,
     responses: [],
-    breadCrumbs: []
+    breadCrumbs: [],
+    names: []
   }),
   methods: {
     addResponse(type) {
-
+      Bus.$emit("newType", type);
     },
-    generateName(index) {
+    generateName(index,) {
       let name = "";
       for (let i = 0; i <= index; ++i) {
-        name += this.breadCrumbs[i];
+        name += this.responses[i];
         if (i < index) {
           name += ":";
         }

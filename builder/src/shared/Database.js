@@ -39,7 +39,7 @@ class Databaseclass {
         return new Promise((resolve, reject) => {
             let key = name;
             let backendPostback = localStorage.getItem(key);
-            if (backendResponse == null) {
+            if (backendPostback == null) {
                 resolve([]);
                 return;
             }

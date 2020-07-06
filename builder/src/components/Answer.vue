@@ -10,18 +10,15 @@
             <v-col lg="6">
                 <v-row>
                     <v-col class="pt-2">
-                        <div style="display: inline" v-for="(b, index) in listBreadCrumbs" :key="index + 1">
-                            <a @click="redirect(index)" v-if="index < listBreadCrumbs.length - 1" class="active-link">
-                                {{ b }}
+                        <div style="display: inline" v-for="(breadCrumb, index) in breadCrumbs" :key="index + 1">
+                            <a @click="redirect(index)" v-if="index < breadCrumbs.length - 1" class="active-link">
+                                {{ breadCrumb }}
                             </a>
-                            <a @click="redirect(index)" v-if="index === listBreadCrumbs.length - 1" class="passive-link">
-                                {{ b }}
+                            <a @click="redirect(-1)" v-if="index === breadCrumbs.length - 1" class="passive-link">
+                                {{ breadCrumb }}
                             </a>
                             <span>/</span>
                         </div>
-                        <a @click="redirect(breadCrumbs.origin)" v-if="!!breadCrumbs.post_back" class="passive-link">
-                            test
-                        </a>
                     </v-col>
                 </v-row>
             </v-col>
@@ -40,6 +37,7 @@
         <v-row justify="center">
             <v-dialog v-model="dialog" max-width="800">
                 <component 
+                    :name="name"
                     ref="Dialog"
                     v-on:closeDialog="closeDialog" 
                     :is="`${currentMsg.type}-editor`"
@@ -73,6 +71,7 @@ import QuicksComp from "./Quicks"
 import CloseIcon from '../assets/close.svg'
 import { Database } from '../shared/Database.js'
 import { Bus } from '../shared/Bus.js'
+import PBus from '../shared/PBus.js'
 
 import TextEditor from './TextEditor'
 import WaitEditor from './WaitEditor'
@@ -89,29 +88,34 @@ function generateHexString(length) {
 
 
 export default {
-    props: ["index", "name", "isIntent", "breadCrumbs"],
+    props: ["index", "isIntent", "name", "parent"],
     data() {
         return {
             response: [],
             dialog: false,
             currentMsg: {},
             currentIndex: -1,
-            listBreadCrumbs: []
+            breadCrumbs: [],
+            pausedDialog: false,
+            pBus: null,
+            parentPBus: null
         }
     },
     created() {
-        console.log(this.breadCrumbs);
-        this.listBreadCrumbs = this.breadCrumbs.split(":");
+        this.pBus = new PBus(this.name);
+        if (!this.isIntent) this.parentPBus = new PBus(this.parent);
+        this.breadCrumbs = this.name.split(":");
         this.loadResponse();
+        // there is also a close dialog listener but it is a local event
+        this.pBus.$on("pauseDialog", this.pauseDialog);
+        this.pBus.$on("newType", this.addResponse);
     },
     mounted() {
-        let id = `answerView:${this.breadCrumbs}`;
-        console.log(id);
-        let view = document.getElementById(id);
-        let y = view.getBoundingClientRect().y
-        let delta = window.innerHeight - y - 15;
-        view.style.maxHeight = `${delta}px`;
-        view.style.height = `${delta}px`;
+        //let id = `answerView:${this.name}`;
+        //let y = this.$refs[id].getBoundingClientRect().y;
+        //let delta = window.innerHeight - y - 15;
+        //iew.style.maxHeight = `${delta}px`;
+        //view.style.height = `${delta}px`;
     },
     components: {
         "text-comp": TextComp,
@@ -125,6 +129,9 @@ export default {
         "quicks-editor": QuicksEditor
     },
     methods: {
+        redirect(index) {
+            
+        },
         openPostBack(postBack) {
             // TODO 
         },
@@ -134,15 +141,24 @@ export default {
                     this.response = response;
                 });
             } else  {
-                Database.loadPostback(this.breadCrumbs).then(response => {
+                Database.loadPostback(this.name).then(response => {
                     this.response = response;
                 });
             }
         },
+        pauseDialog() {
+            this.dialog = false;
+            this.pauseDialog = true;  
+        },
+        continueDialog() {
+            if (this.pauseDialog) this.dialog = true;
+            this.pauseDialog = false;
+        },
         saveResponse() {
             if (!this.isIntent) {
-                Database.savePostback(this.breadCrumbs, this.response).then(() => {
-                     // TODO close postback and go one level higher
+                Database.savePostback(this.name, this.response).then(() => {
+                     Bus.$emit("removeLast");
+                     // TODO add save notification
                 });
             } else {
                 Database.saveResponse(this.name, this.response).then(() => {

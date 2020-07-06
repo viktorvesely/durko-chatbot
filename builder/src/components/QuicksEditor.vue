@@ -52,14 +52,21 @@
       </v-card>
 </template>
 <script>
+import { Bus } from "../shared/Bus.js"
+import PBus from "../shared/PBus.js"
 
 export default {
     data() {
         return {
             value: "",
             btns: [],
-            msg: {}
+            msg: {},
+            pBus: null
         }
+    },
+    props: ["name"],
+    created() {
+        this.pBus = new PBus(this.name);
     },
     methods: {
         closeDialog(save) {
@@ -96,7 +103,8 @@ export default {
             });
         },
         editQuick(post_back) {
-            console.log(post_back);
+            this.pBus.$emit("pauseDialog");
+            this.pBus.$emit("openPostBack", post_back);
         }
     }
 }
