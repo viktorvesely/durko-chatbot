@@ -20,6 +20,11 @@ class PBus {
         //console.log(`Emiting ${translated}`);
         Bus.$emit(translated, arg);
     }
+
+    $off(eventName, handler) {
+        let translated = this.translate(eventName);
+        Bus.$off(translated, handler);
+    }
 }
 
 export default PBus;

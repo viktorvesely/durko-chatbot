@@ -134,6 +134,12 @@ export default {
         "url-editor": URLEditor,
         "quicks-editor": QuicksEditor
     },
+    beforeDestroy() {
+        this.pBus.$off("pauseDialog", this.pauseDialog);
+        this.pBus.$off("newType", this.addResponse);
+        this.pBus.$off("resume", this.resume);
+        this.pBus.$off("saveQuicks", this.saveQuicks);
+    },
     methods: {
         redirect(index) {
             if (index === -1) return;
@@ -185,8 +191,6 @@ export default {
                         msg: "Odpoveď bola uložená"
                     });
                     Bus.$emit("removeLast");
-                    this.pBus = undefined;
-                    this.$destroy();
                 });
             } else {
                 Database.saveResponse(this.name, this.response).then(() => {

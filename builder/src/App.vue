@@ -26,7 +26,7 @@
                   :index="index"
                   :name="names[index]"
                   :isIntent="index === 0"
-                  :key="names[index]"
+                  :key="response.key"
                   ></Answer>
               </v-carousel>
             </v-col>
@@ -49,6 +49,14 @@ import Alerts from "./components/Alerts.vue"
 
 import { Bus } from "./shared/Bus.js";
 
+function generateHexString(length) {
+  var ret = "";
+  while (ret.length < length) {
+    ret += Math.random().toString(16).substring(2);
+  }
+  return ret.substring(0,length);
+}
+
 export default {
   name: "App",
 
@@ -64,7 +72,10 @@ export default {
       this.names = [];
       this.breadCrumbs = [];
 
-      this.responses.push(intent);
+      this.responses.push({
+        value: intent,
+        key: generateHexString(5)
+      });
       this.breadCrumbs.push(intent);
       this.pBuses.push(new PBus(intent));
       this.names.push(this.generateName(0));
@@ -98,9 +109,13 @@ export default {
     });
 
     Bus.$on("openPostBack", postBack => {
+      this.nextId++;
       let display = postBack.title;
       let value = postBack.post_back;
-      this.responses.push(value);
+      this.responses.push({
+        value: value,
+        key: generateHexString(5)
+      });
       this.names.push(this.generateName(this.responses.length - 1));
       this.breadCrumbs.push(display);
       this.pBuses.push(new PBus(this.names[this.names.length - 1]));
@@ -112,23 +127,26 @@ export default {
     responses: [],
     breadCrumbs: [],
     names: [],
-    pBuses: []
+    pBuses: [],
+    screens: [],
+    nextId: 0
   }),
   methods: {
     addResponse(type) {
       let pBus = this.pBuses[this.pBuses.length - 1];
       pBus.$emit("newType", type);
     },
-    generateName(index,) {
+    generateName(index) {
       let name = "";
       for (let i = 0; i <= index; ++i) {
-        name += this.responses[i];
+        name += this.responses[i].value;
         if (i < index) {
           name += ":";
         }
       }
       return name;
     }
+
     
   }
 };
