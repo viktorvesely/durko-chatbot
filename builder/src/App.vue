@@ -1,5 +1,7 @@
 <template>
   <v-app id="root">
+    <Alerts></Alerts>
+    
     <v-container fluid class="pa-2 d-flex align-stretch" style="height:100%">
       <v-row>
         <v-col cols="8" class="pa-0">
@@ -18,7 +20,14 @@
                 v-model="currentResponse"
                 style="max-height: 100%"
               >
-                <Answer v-for="(response, index) in responses" :breadCrumbs="breadCrumbs" :index="index" :parent="index === 0 ? null : names[index - 1]" :name="names[index]" :isIntent="index === 0" :key="names[index]"></Answer>
+                <Answer 
+                  v-for="(response, index) in responses"
+                  :breadCrumbs="breadCrumbs"
+                  :index="index"
+                  :name="names[index]"
+                  :isIntent="index === 0"
+                  :key="names[index]"
+                  ></Answer>
               </v-carousel>
             </v-col>
           </v-row>
@@ -36,6 +45,7 @@ import Search from "./components/Search.vue"
 import Builder from "./components/BuilderBar.vue"
 import Answer from "./components/Answer.vue"
 import PBus from './shared/PBus.js'
+import Alerts from "./components/Alerts.vue"
 
 import { Bus } from "./shared/Bus.js";
 
@@ -43,9 +53,10 @@ export default {
   name: "App",
 
   components: {
-    Search: Search,
+    "Search": Search,
     "b-bar": Builder,
-    Answer: Answer
+    "Answer": Answer,
+    "Alerts": Alerts
   },
   created() {
     Bus.$on("loadIntent", intent => {
@@ -60,16 +71,29 @@ export default {
       this.currentResponse = 0;
     });
 
+    Bus.$on("redirect", index => {
+        let deleteNum = (this.responses.length -1) - index;
+
+        this.responses.splice(index + 1, deleteNum);
+        this.names.splice(index + 1, deleteNum);
+        this.breadCrumbs.splice(index + 1, deleteNum);
+        this.pBuses.splice(index + 1, deleteNum);
+        this.currentResponse = index;
+
+        // Resume dialog
+        this.pBuses[this.pBuses.length - 1].$emit("resume", false);
+    });
+
     Bus.$on("removeLast", () => {
       let index = this.responses.length - 1;
-      this.responses.splice(index, 1);
-      this.names.splice(index, 1);
-      this.breadCrumbs.splice(index, 1);
-      this.pBuses.splice(index, 1);
+      this.responses.pop();
+      this.names.pop();
+      this.breadCrumbs.pop();
+      this.pBuses.pop();
       this.currentResponse--;
 
       // Resume dialog
-      this.pBuses[this.pBuses.length - 1].$emit("resumeDialog");
+      this.pBuses[this.pBuses.length - 1].$emit("resume", true);
 
     });
 

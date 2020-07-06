@@ -1,5 +1,8 @@
 <template>
-    <v-carousel-item>
+    <v-carousel-item 
+        reverse-transition="scale-transition"
+        transition="scale-transition"
+    >
         <v-card class="pl-5 pt-5 pb-0 pr-5 align-self-stretch" :ref="`answerView:${breadCrumbs}`" width="100%" elevation="2" height="100%">
         <v-row dense no-gutters>
             <v-col lg="3">
@@ -97,7 +100,7 @@ export default {
             currentIndex: -1,
             pausedDialog: false,
             pBus: null,
-            parentPBus: null
+            saved: true
         }
     },
     created() {
@@ -130,7 +133,17 @@ export default {
     },
     methods: {
         redirect(index) {
+            if (index === -1) return;
+            let response = true;
+            
+            if (!this.saved) {
+                response = window.confirm("Naozaj chceš odísť? Máš tu ešte neuložené zmeny");
+            }
 
+            if (response) {
+                Bus.$emit("redirect", index);
+            }
+            
         },
         loadResponse() {
             if (this.isIntent) {
@@ -147,19 +160,26 @@ export default {
             this.dialog = false;
             this.pauseDialog = true;
         },
-        resumeDialog() {
-            if (this.pauseDialog) this.dialog = true;
+        resume(continueDialog) {
+            if (continueDialog && this.pauseDialog) {
+                this.dialog = true;
+            }
             this.pauseDialog = false;
         },
         saveResponse() {
             if (!this.isIntent) {
                 Database.savePostback(this.name, this.response).then(() => {
                      Bus.$emit("removeLast");
+                     this.saved = true;
                      // TODO add save notification
                 });
             } else {
                 Database.saveResponse(this.name, this.response).then(() => {
-                    // TODO add save notification
+                    Bus.$emit("newAlert", {
+                        type: "success",
+                        msg: "Intent bol uložený dwajwoj oawkko dawkdoaw odawk s"
+                    });
+                    this.saved = true;
                 });
             }
         },
@@ -179,9 +199,11 @@ export default {
             this.$set(this.response, this.currentIndex, msg);
         },
         removeElement(index) {
+            this.saved = false;
             this.response.splice(index, 1);
         },
         addResponse(type) {
+            this.saved = false;
             let response = {
                 type: type,
                 key: generateHexString(5)
