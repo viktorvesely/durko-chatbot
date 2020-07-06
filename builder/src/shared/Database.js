@@ -18,11 +18,6 @@ class Databaseclass {
             resolve();
         });
     }
-
-    formKey(intent, name) {
-        return `${intent}:${name}`;
-    }
-
     loadResponse(intent) {
         return new Promise((resolve, reject) => {
             let backendResponse = localStorage.getItem(intent);
@@ -32,6 +27,13 @@ class Databaseclass {
             }
             let response = this.frontendResponse(backendResponse);
             resolve(response);
+        });
+    }
+
+    removePostback(name) {
+        return new Promise((resolve, reject) => {
+            localStorage.removeItem(name);
+            resolve();
         });
     }
 

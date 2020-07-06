@@ -42,7 +42,8 @@
                 <component 
                     :name="name"
                     ref="Dialog"
-                    v-on:closeDialog="closeDialog" 
+                    v-on:closeDialog="closeDialog"
+                    v-on:removePostback="removePostback"
                     :is="`${currentMsg.type}-editor`"
                     >
                 </component>
@@ -100,7 +101,8 @@ export default {
             currentIndex: -1,
             pausedDialog: false,
             pBus: null,
-            saved: true
+            saved: true,
+            removePostbacks: []
         }
     },
     created() {
@@ -111,7 +113,8 @@ export default {
         // there is also a close dialog listener but it is a local event
         this.pBus.$on("pauseDialog", this.pauseDialog);
         this.pBus.$on("newType", this.addResponse);
-        this.pBus.$on("resumeDialog", this.resumeDialog);
+        this.pBus.$on("resume", this.resume);
+        this.pBus.$on("saveQuicks", this.saveQuicks);
     },
     mounted() {
         //let id = `answerView:${this.name}`;
@@ -166,18 +169,30 @@ export default {
             }
             this.pauseDialog = false;
         },
+        emptyPostbacksBin() {
+            this.removePostbacks.forEach(postBack => {
+                Database.removePostback(postBack);
+            });
+            this.removePostbacks = [];
+        },
         saveResponse() {
+            this.emptyPostbacksBin();
             if (!this.isIntent) {
                 Database.savePostback(this.name, this.response).then(() => {
-                     Bus.$emit("removeLast");
-                     this.saved = true;
-                     // TODO add save notification
+                    this.saved = true;
+                    Bus.$emit("alert", {
+                        type: "success",
+                        msg: "Odpoveď bola uložená"
+                    });
+                    Bus.$emit("removeLast");
+                    this.pBus = undefined;
+                    this.$destroy();
                 });
             } else {
                 Database.saveResponse(this.name, this.response).then(() => {
-                    Bus.$emit("newAlert", {
+                    Bus.$emit("alert", {
                         type: "success",
-                        msg: "Intent bol uložený dwajwoj oawkko dawkdoaw odawk s"
+                        msg: "Intent bol uložený"
                     });
                     this.saved = true;
                 });
@@ -198,11 +213,35 @@ export default {
             this.dialog = false;
             this.$set(this.response, this.currentIndex, msg);
         },
+        formNextName(postBackValue) {
+            return `${this.name}:${postBackValue}`
+        },
+        saveQuicks() {
+            this.emptyPostbacksBin();
+        },
+        removePostback(postBackValue) {
+            this.removePostbacks.push(this.formNextName(postBackValue));
+        },
         removeElement(index) {
             this.saved = false;
-            this.response.splice(index, 1);
+            let msg = this.response.splice(index, 1)[0];
+            if (msg.type === "quicks") {
+                msg.options.forEach(choice => {
+                    this.removePostbacks.push(this.formNextName(choice.post_back));
+                });
+            }
         },
         addResponse(type) {
+            let last = this.response[this.response.length - 1];
+            if (last && last.type === "quicks") {
+                console.log("alert ty kek");
+                Bus.$emit("alert", {
+                    type: "error",
+                    msg: "Rýchle odpovede musia byť ako posledný prvok správy"
+                });
+                return;
+            }
+
             this.saved = false;
             let response = {
                 type: type,

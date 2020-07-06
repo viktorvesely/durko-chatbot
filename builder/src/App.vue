@@ -1,7 +1,7 @@
 <template>
   <v-app id="root">
     <Alerts></Alerts>
-    
+
     <v-container fluid class="pa-2 d-flex align-stretch" style="height:100%">
       <v-row>
         <v-col cols="8" class="pa-0">
@@ -81,7 +81,7 @@ export default {
         this.currentResponse = index;
 
         // Resume dialog
-        this.pBuses[this.pBuses.length - 1].$emit("resume", false);
+        this.pBuses[this.pBuses.length - 1].$emit("resume", true);
     });
 
     Bus.$on("removeLast", () => {

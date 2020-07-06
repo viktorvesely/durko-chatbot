@@ -73,6 +73,7 @@ export default {
             if (save) {
                 this.msg.value = this.value;
                 this.msg.options = this.btns;
+                this.pBus.$emit("saveQuicks");
             }
             this.$emit("closeDialog", this.msg);
             this.value = "";
@@ -94,7 +95,8 @@ export default {
             this.msg = msg;
         },
         remove(index) {
-            this.btns.splice(index, 1);
+            let removed = this.btns.splice(index, 1)[0];
+            this.$emit("removePostback", removed.post_back);
         },
         addQuick() {
             this.btns.push({

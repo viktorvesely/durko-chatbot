@@ -32,7 +32,7 @@ export default {
         }
     },
     created() {
-        Bus.$on("newAlert", alert => {
+        Bus.$on("alert", alert => {
             alert.key = generateHexString(5);
             alert.value = true;
             this.alerts.push(alert);
