@@ -104,7 +104,7 @@ export default {
         },
         editQuick(post_back) {
             this.pBus.$emit("pauseDialog");
-            this.pBus.$emit("openPostBack", post_back);
+            Bus.$emit("openPostBack", post_back);
         }
     }
 }

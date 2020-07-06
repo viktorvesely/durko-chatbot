@@ -88,14 +88,13 @@ function generateHexString(length) {
 
 
 export default {
-    props: ["index", "isIntent", "name", "parent"],
+    props: ["index", "isIntent", "name", "parent", "breadCrumbs"],
     data() {
         return {
             response: [],
             dialog: false,
             currentMsg: {},
             currentIndex: -1,
-            breadCrumbs: [],
             pausedDialog: false,
             pBus: null,
             parentPBus: null
@@ -104,11 +103,12 @@ export default {
     created() {
         this.pBus = new PBus(this.name);
         if (!this.isIntent) this.parentPBus = new PBus(this.parent);
-        this.breadCrumbs = this.name.split(":");
         this.loadResponse();
+
         // there is also a close dialog listener but it is a local event
         this.pBus.$on("pauseDialog", this.pauseDialog);
         this.pBus.$on("newType", this.addResponse);
+        this.pBus.$on("resumeDialog", this.resumeDialog);
     },
     mounted() {
         //let id = `answerView:${this.name}`;
@@ -130,10 +130,7 @@ export default {
     },
     methods: {
         redirect(index) {
-            
-        },
-        openPostBack(postBack) {
-            // TODO 
+
         },
         loadResponse() {
             if (this.isIntent) {
@@ -148,9 +145,9 @@ export default {
         },
         pauseDialog() {
             this.dialog = false;
-            this.pauseDialog = true;  
+            this.pauseDialog = true;
         },
-        continueDialog() {
+        resumeDialog() {
             if (this.pauseDialog) this.dialog = true;
             this.pauseDialog = false;
         },

@@ -18,7 +18,7 @@
                 v-model="currentResponse"
                 style="max-height: 100%"
               >
-                <Answer v-for="(response, index) in responses" :index="index" :parent="index === 0 ? null : names[index - 1]" :name="names[index]" :isIntent="index === 0" :key="names[index]"></Answer>
+                <Answer v-for="(response, index) in responses" :breadCrumbs="breadCrumbs" :index="index" :parent="index === 0 ? null : names[index - 1]" :name="names[index]" :isIntent="index === 0" :key="names[index]"></Answer>
               </v-carousel>
             </v-col>
           </v-row>
@@ -32,9 +32,10 @@
 </template>
 
 <script>
-import Search from "./components/Search.vue";
-import Builder from "./components/BuilderBar.vue";
-import Answer from "./components/Answer.vue";
+import Search from "./components/Search.vue"
+import Builder from "./components/BuilderBar.vue"
+import Answer from "./components/Answer.vue"
+import PBus from './shared/PBus.js'
 
 import { Bus } from "./shared/Bus.js";
 
@@ -50,7 +51,11 @@ export default {
     Bus.$on("loadIntent", intent => {
       this.responses = [];
       this.names = [];
+      this.breadCrumbs = [];
+
       this.responses.push(intent);
+      this.breadCrumbs.push(intent);
+      this.pBuses.push(new PBus(intent));
       this.names.push(this.generateName(0));
       this.currentResponse = 0;
     });
@@ -59,12 +64,22 @@ export default {
       let index = this.responses.length - 1;
       this.responses.splice(index, 1);
       this.names.splice(index, 1);
+      this.breadCrumbs.splice(index, 1);
+      this.pBuses.splice(index, 1);
       this.currentResponse--;
+
+      // Resume dialog
+      this.pBuses[this.pBuses.length - 1].$emit("resumeDialog");
+
     });
 
     Bus.$on("openPostBack", postBack => {
-      this.responses.push(postBack);
+      let display = postBack.title;
+      let value = postBack.post_back;
+      this.responses.push(value);
       this.names.push(this.generateName(this.responses.length - 1));
+      this.breadCrumbs.push(display);
+      this.pBuses.push(new PBus(this.names[this.names.length - 1]));
       this.currentResponse++;
     });
   },
@@ -72,11 +87,13 @@ export default {
     currentResponse: 0,
     responses: [],
     breadCrumbs: [],
-    names: []
+    names: [],
+    pBuses: []
   }),
   methods: {
     addResponse(type) {
-      Bus.$emit("newType", type);
+      let pBus = this.pBuses[this.pBuses.length - 1];
+      pBus.$emit("newType", type);
     },
     generateName(index,) {
       let name = "";

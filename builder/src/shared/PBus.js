@@ -11,13 +11,13 @@ class PBus {
 
     $on(eventName, handler) {
         let translated = this.translate(eventName);
-        console.log(`Listening ${translated}`); 
+        //console.log(`Listening ${translated}`); 
         Bus.$on(translated, handler);
     }
 
     $emit(eventName, arg) {
         let translated = this.translate(eventName);
-        console.log(`Emiting ${translated}`);
+        //console.log(`Emiting ${translated}`);
         Bus.$emit(translated, arg);
     }
 }
