@@ -114,7 +114,8 @@ export default {
         this.pBus.$on("pauseDialog", this.pauseDialog);
         this.pBus.$on("newType", this.addResponse);
         this.pBus.$on("resume", this.resume);
-        this.pBus.$on("saveQuicks", this.saveQuicks);
+        this.pBus.$on("emptyBin", this.emptyPostbacksBin);
+        this.pBus.$on("saveQuicks", this.quickSave);
     },
     mounted() {
         //let id = `answerView:${this.name}`;
@@ -138,7 +139,8 @@ export default {
         this.pBus.$off("pauseDialog", this.pauseDialog);
         this.pBus.$off("newType", this.addResponse);
         this.pBus.$off("resume", this.resume);
-        this.pBus.$off("saveQuicks", this.saveQuicks);
+        this.pBus.$off("emptyBin", this.emptyPostbacksBin);
+        this.pBus.$off("saveQuicks", this.quickSave);
     },
     methods: {
         redirect(index) {
@@ -181,6 +183,18 @@ export default {
             });
             this.removePostbacks = [];
         },
+        quickSave(msg) {
+            this.$set(this.response, this.currentIndex, msg);
+            if (!this.isIntent) {
+                Database.savePostback(this.name, this.response).then(() => {
+                    this.saved = true;
+                });
+            } else {
+                Database.saveResponse(this.name, this.response).then(() => {
+                    this.saved = true;
+                });
+            }
+        },
         saveResponse() {
             this.emptyPostbacksBin();
             if (!this.isIntent) {
@@ -219,9 +233,6 @@ export default {
         },
         formNextName(postBackValue) {
             return `${this.name}:${postBackValue}`
-        },
-        saveQuicks() {
-            this.emptyPostbacksBin();
         },
         removePostback(postBackValue) {
             this.removePostbacks.push(this.formNextName(postBackValue));

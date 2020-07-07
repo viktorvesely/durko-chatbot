@@ -73,7 +73,7 @@ export default {
             if (save) {
                 this.msg.value = this.value;
                 this.msg.options = this.btns;
-                this.pBus.$emit("saveQuicks");
+                this.pBus.$emit("emptyBin");
             }
             this.$emit("closeDialog", this.msg);
             this.value = "";
@@ -85,7 +85,7 @@ export default {
                 copy.push({
                     title: btn.title,
                     post_back: btn.post_back
-                })      
+                });
             });
             return copy;
         },
@@ -105,7 +105,15 @@ export default {
             });
         },
         editQuick(post_back) {
+            //save
+            this.msg.value = this.value;
+            this.msg.options = this.btns;
+            this.pBus.$emit("saveQuicks", this.msg);
+            
+            //pause dialog
             this.pBus.$emit("pauseDialog");
+
+            //open new editor
             Bus.$emit("openPostBack", post_back);
         }
     }

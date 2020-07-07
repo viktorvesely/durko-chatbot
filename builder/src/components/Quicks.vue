@@ -28,7 +28,7 @@ export default {
 }
 
 .text-response {
-    background-color: #BCE4FA;
+    background-color: #97cae6;
     border-radius: 15px;
     padding: 5px 15px;
     color: white;

@@ -82,7 +82,7 @@ export default {
 
 
 .bubble {
-    background-color: #BCE4FA;
+    background-color: #97cae6;
     border-radius: 15px;
     width: 100%;
     padding: 5px 15px;
