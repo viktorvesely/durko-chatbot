@@ -157,15 +157,9 @@ export default {
             
         },
         loadResponse() {
-            if (this.isIntent) {
-                Database.loadResponse(this.name).then(response => {
-                    this.response = response;
-                });
-            } else  {
-                Database.loadPostback(this.name).then(response => {
-                    this.response = response;
-                });
-            }
+            Database.load(this.name).then(response => {
+                this.response = response;
+            });
         },
         pauseDialog() {
             this.dialog = false;
@@ -185,36 +179,27 @@ export default {
         },
         quickSave(msg) {
             this.$set(this.response, this.currentIndex, msg);
-            if (!this.isIntent) {
-                Database.savePostback(this.name, this.response).then(() => {
-                    this.saved = true;
-                });
-            } else {
-                Database.saveResponse(this.name, this.response).then(() => {
-                    this.saved = true;
-                });
-            }
+            Database.save(this.name, this.response).then(() => {
+                this.saved = true;
+            });
         },
         saveResponse() {
             this.emptyPostbacksBin();
-            if (!this.isIntent) {
-                Database.savePostback(this.name, this.response).then(() => {
-                    this.saved = true;
+            Database.save(this.name, this.response).then(() => {
+                this.saved = true;
+                if (this.isIntent) {
+                    Bus.$emit("alert", {
+                        type: "success",
+                        msg: "Intent bol uložený"
+                    });
+                } else {
                     Bus.$emit("alert", {
                         type: "success",
                         msg: "Odpoveď bola uložená"
                     });
                     Bus.$emit("removeLast");
-                });
-            } else {
-                Database.saveResponse(this.name, this.response).then(() => {
-                    Bus.$emit("alert", {
-                        type: "success",
-                        msg: "Intent bol uložený"
-                    });
-                    this.saved = true;
-                });
-            }
+                }
+            });
         },
         typeToComponent(type) {
             return `${type}-comp`;
@@ -249,7 +234,6 @@ export default {
         addResponse(type) {
             let last = this.response[this.response.length - 1];
             if (last && last.type === "quicks") {
-                console.log("alert ty kek");
                 Bus.$emit("alert", {
                     type: "error",
                     msg: "Rýchle odpovede musia byť ako posledný prvok správy"
