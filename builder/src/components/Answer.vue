@@ -252,10 +252,11 @@ export default {
                     break;
                 case "url":
                     response.value = "Viac info nájdeš na tejto stránke";
-                    response.options =  {
-                        url: "URL adresa",
-                        title: "Klikni na mňa"
-                    }
+                    response.options = 
+                        {
+                            url: "URL adresa",
+                            title: "Klikni na mňa"
+                        };
                     break;
                 case "text":
                     response.value = "Klikni na mňa aby si ma upravil(a)";

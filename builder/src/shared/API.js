@@ -1,10 +1,9 @@
 import axios from 'axios';
 
-const DEPLOYED = false;
 
 export default {
     getIntents() {
-        if (!DEPLOYED) {
+        if (false) {
             return new Promise((resolve, reject) => {
                 resolve([{name: "request_holiday"}, {name: "knock_knock"}, {name: "get_info"}]);
             });

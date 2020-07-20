@@ -5,7 +5,9 @@
                 <h3>Zvoľ si akú odpoveď chceš editovať</h3>
             </v-col>
             <v-col lg="5">   
-                <v-select v-model="current" dense color="#BCE4FA" :items='options' @change="selectIntent"></v-select>
+                <v-autocomplete spellcheck="false" v-model="current" dense color="#BCE4FA" :items='options' @change="selectIntent" label="Názov intentu">
+                    
+                </v-autocomplete>
             </v-col>
         </v-row>
         <v-row dense>
@@ -31,14 +33,8 @@ export default {
     },
     created() {
         API.getIntents().then(intents => {
-            intents.forEach(intent => {
-                this.options.push(
-                    {
-                        value: intent.name,
-                        text: intent.name
-                    });
-            });
-            this.current = intents[0].name;
+            this.options = intents;
+            this.current = intents[0];
             this.selectIntent(this.current);
         });
     },

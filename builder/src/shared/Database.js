@@ -37,8 +37,7 @@ class Databaseclass {
                 request: "remove",
                 names: names
             }
-            axio.post(this.url("responses"), sendResponse).then(response => {
-                console.log(response);
+            axios.post(this.url("responses"), sendResponse).then(() => {
                 resolve();
             });
         });
@@ -51,11 +50,12 @@ class Databaseclass {
             let serialized = {
                 value: msg.value
             };
+            let btns;
             switch(msg.type) {
                 case "quicks":
                     serialized.type = "buttons";
-                    let btns = [];
-                    msg.options.foreach(btn => {
+                    btns = [];
+                    msg.options.forEach(btn => {
                         btns.push({
                             title: btn.title,
                             type: "postback",
@@ -66,17 +66,18 @@ class Databaseclass {
                         btns: btns
                     }
                     break;
-                case "URL":
+                case "url":
                     serialized.type = "buttons";
-                    let btn = [
-                        {
+                    btns = [];
+                    //msg.options.forEach(btn => {
+                        btns.push({
+                            title: msg.options.title,
                             type: "web_url",
-                            urls: msg.options.url,
-                            title: msg.options.title
-                        }
-                    ]
+                            url: msg.options.url
+                        });
+                    //});
                     serialized.options = {
-                        btns: btn
+                        btns: btns
                     }
                     break;
                 case "text":
@@ -84,7 +85,6 @@ class Databaseclass {
                     break;
                 case "wait":
                     serialized.type = "wait";
-                    serialized.value = msg.value;
                     break;
             }
             serializedResponse.push(serialized);
@@ -93,11 +93,43 @@ class Databaseclass {
     }
 
     serializeBackend(response) {
-        let msgs = JSON.parse(response);
         let serializedResponse = [];
-        msgs.foreach(msg => {
-            
-        });
+        for (let i = 0; i < response.length; ++i) {
+            let msg = response[i];
+            let serialized = {
+                value: msg.value
+            };
+            switch(msg.type) {
+                case "buttons":
+                    let btns = msg.options.btns;
+                    if (btns[0].type === "postback") { // Quicks
+                        serialized.type = "quicks";
+                        let quicks = []
+                        btns.forEach(btn => {
+                            quicks.push({
+                                title: btn.title,
+                                post_back: btn.payload
+                            });
+                        });
+                        serialized.options = quicks;
+                    } else  { // URL
+                        serialized.type = "url";
+                        let url = {
+                            title: btns[0].title,
+                            url: btns[0].url
+                        }
+                        serialized.options = url;
+                    }
+                    break;
+                case "text":
+                    serialized.type = "text";
+                    break;
+                case "wait":
+                    serialized.type = "wait";
+                    break;
+            }
+            serializedResponse.push(serialized);
+        }
         return serializedResponse;
     }
 

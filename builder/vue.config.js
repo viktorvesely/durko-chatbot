@@ -1,4 +1,5 @@
 module.exports = {
+  outputDir: "C:/Users/Viktor/Documents/gjh-chatbot/builder",
   chainWebpack: (config) => {
     const svgRule = config.module.rule('svg');
 

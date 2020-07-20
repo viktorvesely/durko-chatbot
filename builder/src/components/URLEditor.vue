@@ -56,6 +56,10 @@ export default {
             title: ""
         }
     },
+    props: ["name"],
+    created() {
+        this.pBus = new PBus(this.name);
+    },
     methods: {
         closeDialog(save) {
             if (save) {
