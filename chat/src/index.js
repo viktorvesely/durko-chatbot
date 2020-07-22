@@ -1,101 +1,15 @@
 
-import Vue from 'vue'
-import BotUI from 'botui'
-import './main.css'
-import io from 'socket.io-client';
 import MessageRequest from './MsgReq.js'
 import axios from 'axios'
+import Socket from './Socket.js'
+import Chat from './Chat.js'
 
+import './main.css'
 
 const sender_psid = "testing_sender_psid_123";
-var currentMsgIndex = null;
+const socket = new Socket();
+const chat = new Chat("durko-chat", send_query);
 
-var chat = new BotUI("durko-chat", {
-    vue: Vue
-});
-
-const socket = io('localhost:1337');
-socket.on("new_message", () => {
-    axios.post("/pendings", {sender_psid: sender_psid})
-    .then(response => {
-        let data = response.data;
-        let msgs = data.msgs;
-        if (!data.update) return;
-        let button = false;
-
-        msgs.forEach(msg => {
-            if (currentMsgIndex !== null) {
-                if (msg.type === "buttons") {
-                    button = true;
-                    let btn = msg.options.btns[0];
-                    chat.message.update(currentMsgIndex, {
-                        loading: false,
-                        content: msg.value
-                    });
-                    chat.action.button({
-                        action: [
-                            {
-                                text: btn.title,
-                                value: btn.url 
-                            }
-                        ]
-                    }).then(res => {
-                        window.open(res.value);
-                    });
-                    return;
-                }
-
-
-                chat.message.update(currentMsgIndex, {
-                    loading: false,
-                    content: msg.value
-                });
-                currentMsgIndex = null;
-            } else {
-                if (msg.type === "buttons") {
-                    button = true;
-                    let btn = msg.options.btns[0];
-                    chat.message.add({
-                        content: msg.value,
-                        human: false
-                    });
-                    chat.action.button({
-                        human: false,
-                        action: [
-                            {
-                                text: btn.title,
-                                value: btn.url 
-                            },
-                            {
-                                text: "Nie diky",
-                                value: "none"
-                            }
-                        ]
-                    }).then(res => {
-                        readQuery();
-                        if (res.value === "none") return;
-                        window.open(res.value);
-                    });
-                    return;
-                }
-                chat.message.add({
-                    content: msg.value,
-                    human: false  
-                });
-            }
-        });
-        
-        if (!button) {
-            readQuery();
-        }
-
-    })
-    .catch(function (error) {
-        console.error(error);
-    });
-});
-
-socket.emit("identify", sender_psid);
 
 function send_query(msg) {
     axios.post('/webhook', new MessageRequest(msg).export())
@@ -107,28 +21,63 @@ function send_query(msg) {
       });
 }
 
-function setBusy() {
-    return chat.message.add({
-        loading: true,
-        human: false
-    });
-}
-
-function readQuery() {
-    chat.action.text({
-        action: {
-            placeholder: 'Co chces?!'
-        }
-    }).then(function (res) {
-        setBusy().then(index => {
-            currentMsgIndex = index;;
-            send_query(res.value);
+function getPendings() {
+    return new Promise((resolve, reject) => {
+        axios.post("/pendings", {sender_psid: sender_psid})
+        .then(response => {
+            let data = response.data;
+            let msgs = data.msgs;
+            resolve(msgs);
         });
     });
 }
 
-chat.message.add({
-    content: 'Helo babe!'
-  }).then(function () {
-    readQuery();
-  });
+function handlePostBacks(value) {
+    console.log(value);
+}
+
+function handleMsg(msg) {
+    switch(msg.type) {
+        case "buttons":
+            let btns = msg.options.btns;
+            let first = btns[0];
+            chat.text(msg.value);
+            if (first.type === "web_url") {
+                chat.url(btns);
+            } else if (first.type === "postback") {
+                chat.quicks(btns, handlePostBacks);
+            } else {
+                throw new Error("Could not identify btns type. Got:" + first.type.toString());
+            }
+            break;
+        case "wait":
+            chat.wait(msg.value);
+            break;
+        case "text":
+            chat.text(msg.value);
+            break;
+        default:
+            throw new Error("Could not identify msg type. Got:" + msg.type.toString());
+    };
+}
+
+function onMessage() {
+    getPendings().then(msgs => {
+        msgs.forEach(msg => {
+            handleMsg(msg);
+        });
+    });
+}
+
+function noMessage() {
+    chat.readQuery();
+}
+
+socket.onMessage(onMessage).noMessage(noMessage);
+
+
+function init() {
+    socket.identify(sender_psid);
+}
+
+init();
