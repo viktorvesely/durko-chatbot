@@ -43,7 +43,7 @@ class Databaseclass {
         });
     }
 
-    serializeFrontend(response) {
+    serializeFrontend(response, name) {
         let serializedResponse = [];
         for (let i = 0; i < response.length; ++i) {
             let msg = response[i];
@@ -59,7 +59,7 @@ class Databaseclass {
                         btns.push({
                             title: btn.title,
                             type: "postback",
-                            payload: btn.post_back
+                            payload: name + ":" + btn.post_back
                         });
                     });
                     serialized.options = {
@@ -106,9 +106,12 @@ class Databaseclass {
                         serialized.type = "quicks";
                         let quicks = []
                         btns.forEach(btn => {
+                            let postback = btn.payload;
+                            postback = postback.split(":");
+                            postback = postback.pop();
                             quicks.push({
                                 title: btn.title,
-                                post_back: btn.payload
+                                post_back: postback
                             });
                         });
                         serialized.options = quicks;
@@ -138,7 +141,7 @@ class Databaseclass {
     }
 
     backend(name, frontend) {
-        let payload = { name: name, isIntent: name.split(':').length === 1, response: this.serializeFrontend(frontend) };
+        let payload = { name: name, isIntent: name.split(':').length === 1, response: this.serializeFrontend(frontend, name) };
         let request = { payload: payload, request: ""};
         return request;
     }

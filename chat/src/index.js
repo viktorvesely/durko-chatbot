@@ -1,5 +1,5 @@
 
-import MessageRequest from './MsgReq.js'
+import Request from './Request.js'
 import axios from 'axios'
 import Socket from './Socket.js'
 import Chat from './Chat.js'
@@ -12,7 +12,7 @@ const chat = new Chat("durko-chat", send_query);
 
 
 function send_query(msg) {
-    axios.post('/webhook', new MessageRequest(msg).export())
+    axios.post('/webhook', new Request(msg, sender_psid).export())
       .then(function (response) {
           // TODO print an error msg if something went wrong
       })
@@ -33,7 +33,13 @@ function getPendings() {
 }
 
 function handlePostBacks(value) {
-    console.log(value);
+    axios.post('/webhook', new Request(value, sender_psid, false).export())
+      .then(function (response) {
+          // TODO print an error msg if something went wrong
+      })
+      .catch(function (error) {
+        console.error(error);
+      });
 }
 
 function handleMsg(msg) {
