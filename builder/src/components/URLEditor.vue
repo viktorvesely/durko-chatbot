@@ -59,6 +59,7 @@
 <script>
 
 
+import { Bus } from "../shared/Bus.js"
 import PBus from "../shared/PBus.js"
 
 export default {
@@ -75,8 +76,26 @@ export default {
         this.pBus = new PBus(this.name);
     },
     methods: {
+        evalURL(url) {
+            try {
+                let temp = new URL(url);
+            } catch(_) {
+                return false;
+            }
+            return true;
+        },
         closeDialog(save) {
             if (save) {
+                for (let i = 0; i < this.btns.length; ++i) {
+                    let btn = this.btns[i];
+                    if (!this.evalURL(btn.url)) {
+                        Bus.$emit("alert", {
+                            type: "error",
+                            msg: "URL addres nie je validná. Nezabudli ste na 'http(s)' alebo 'www'?"
+                        });
+                        return;
+                    }
+                }
                 this.msg.value = this.value;
                 this.msg.options = this.btns;
             }

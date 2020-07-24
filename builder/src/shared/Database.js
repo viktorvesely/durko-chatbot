@@ -13,7 +13,6 @@ class Databaseclass {
             let sendResponse = this.backend(name, response);
             sendResponse.request = "save";
             axios.post(this.url("responses"), sendResponse).then(() => {
-                console.log("saved");
                 resolve();
             });
         });
