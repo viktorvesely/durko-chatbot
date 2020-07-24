@@ -32,7 +32,7 @@ export default {
 }
 
 .text-response {
-    background-color: #97cae6;
+    background-color: #32d2db;
     border-radius: 15px;
     padding: 5px 15px;
     color: white;

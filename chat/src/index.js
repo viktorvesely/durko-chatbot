@@ -5,6 +5,8 @@ import Socket from './Socket.js'
 import Chat from './Chat.js'
 
 import './main.css'
+import './botui.min.css'
+import './botui-theme-default.css'
 
 const sender_psid = "testing_sender_psid_123";
 const socket = new Socket();

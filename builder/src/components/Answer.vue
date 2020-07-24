@@ -1,9 +1,12 @@
 <template>
     <v-carousel-item 
+            style="max-height: 100%; height: 100%"
         reverse-transition="scale-transition"
         transition="scale-transition"
+        color="secondary"
     >
-        <v-card class="pl-5 pt-5 pb-0 pr-5 align-self-stretch" :ref="`answerView:${breadCrumbs}`" width="100%" elevation="2" height="100%">
+        <v-card 
+            color="secondary" outlined class="pl-5 pt-5 pb-0 pr-5 align-self-stretch primary--text" :ref="`answerView:${breadCrumbs}`" width="100%" elevation="2" height="100%">
         <v-row dense no-gutters>
             <v-col lg="3">
                  <h3>
@@ -27,16 +30,18 @@
             </v-col>
             <v-spacer></v-spacer>
             <v-col lg="2" class="pt-4">
-                <v-btn color="blue" outlined text @click="saveResponse()">Uložiť</v-btn>
+                <v-btn color="primary" outlined text @click="saveResponse()">Uložiť</v-btn>
             </v-col>
         </v-row>
+
         <v-row dense no-gutters>
-            <v-col>
+            <v-col class="accent--text">
                  <p>
                     Takto nejako bude tvoja odpoveď vyzerať
                 </p>
             </v-col>
         </v-row>
+        <v-divider class="mb-3"></v-divider>
         <v-row justify="center">
             <v-dialog v-model="dialog" max-width="800">
                 <component 
@@ -49,11 +54,20 @@
                 </component>
             </v-dialog>
         </v-row>
-        <div ref="Cap" class="cap">
-            <v-row dense no-gutters justify="center" tag="div" class="item-wrapper pa-2 d-flex align-stretch" v-for="(type, index) in response" :key="type.key">
+
+        <v-row class="temp" v-if="response.length === 0" justify="center">
+            <v-col cols="4">
+                <add-btn v-on:addResponse="addResponse"></add-btn>
+            </v-col>
+            <v-col cols="1">
+            </v-col>
+        </v-row>
+        <div ref="Cap" class="cap" style="overflow:auto; height: 76%">
+            <v-row dense no-gutters justify="center" tag="div" class="item-wrapper mt-2 mb-2 pa-2 d-flex align-stretch accent--text" v-for="(type, index) in response" :key="type.key">
                 <v-col cols="4">
                     <component v-bind:is="typeToComponent(type.type)" :msg="type" class="item" @click.native.stop="displayDialog(type, index)">
                     </component>
+                    <add-btn v-on:addResponse="addResponse" v-if="index === response.length - 1 && !last"></add-btn>
                 </v-col>
                 <v-col cols="1">
                     <v-btn icon color="black" @click="removeElement(index)">
@@ -63,6 +77,7 @@
             </v-row>
         </div>
         
+        
     </v-card> 
     </v-carousel-item>   
 </template>
@@ -71,6 +86,7 @@ import TextComp from "./Text"
 import WaitComp from "./Wait"
 import URLComp from "./URL"
 import QuicksComp from "./Quicks"
+import AddButton from "./AddButton.vue"
 
 import CloseIcon from '../assets/close.svg'
 import { Database } from '../shared/Database.js'
@@ -102,7 +118,8 @@ export default {
             pausedDialog: false,
             pBus: null,
             saved: true,
-            removePostbacks: []
+            removePostbacks: [],
+            items:[]
         }
     },
     created() {
@@ -124,6 +141,15 @@ export default {
         //iew.style.maxHeight = `${delta}px`;
         //view.style.height = `${delta}px`;
     },
+    computed: {
+        last() {
+            let last = this.response[this.response.length - 1];
+            if (last && last.type === "quicks" || last.type === "url") {
+                return true;
+            }
+            return false;
+        }
+    },
     components: {
         "text-comp": TextComp,
         "wait-comp": WaitComp,
@@ -133,7 +159,8 @@ export default {
         "text-editor": TextEditor,
         "wait-editor": WaitEditor,
         "url-editor": URLEditor,
-        "quicks-editor": QuicksEditor
+        "quicks-editor": QuicksEditor,
+        "add-btn": AddButton
     },
     beforeDestroy() {
         this.pBus.$off("pauseDialog", this.pauseDialog);
@@ -232,14 +259,6 @@ export default {
             }
         },
         addResponse(type) {
-            let last = this.response[this.response.length - 1];
-            if (last && last.type === "quicks") {
-                Bus.$emit("alert", {
-                    type: "error",
-                    msg: "Rýchle odpovede musia byť ako posledný prvok správy"
-                });
-                return;
-            }
 
             this.saved = false;
             let response = {

@@ -1,17 +1,13 @@
 <template>
     <div class="wait">
-        <WaitIcon class="icon"></WaitIcon>
+        <v-icon color="black" large class="mb-3">mdi-timer-sand</v-icon>
         <div class="description">Pauza na {{ msg.value }} ms</div>
     </div>
 </template>
 <script>
-import WaitIcon from "../assets/timer.svg"
 
 export default {
     props: ["msg"],
-    components: {
-        "WaitIcon": WaitIcon
-    }
 }
 </script>
 <style lang="scss" scoped>

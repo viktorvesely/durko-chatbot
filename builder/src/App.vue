@@ -1,41 +1,31 @@
 <template>
-  <v-app id="root">
+  <v-app id="root" :style="{background: $vuetify.theme.themes.light.background}">
     <Alerts></Alerts>
 
-    <v-container fluid class="pa-2 d-flex align-stretch" style="height:100%">
-      <v-row>
-        <v-col cols="8" class="pa-0">
-          <v-row>
-            <v-col>
-              <Search></Search>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col class="pt-0 pb-0">
-              <v-carousel
-                hide-delimiters
-                :show-arrows="false"
-                height="100%"
-                light
-                v-model="currentResponse"
-                style="max-height: 100%"
-              >
-                <Answer 
-                  v-for="(response, index) in responses"
-                  :breadCrumbs="breadCrumbs"
-                  :index="index"
-                  :name="names[index]"
-                  :isIntent="index === 0"
-                  :key="response.key"
-                  ></Answer>
-              </v-carousel>
-            </v-col>
-          </v-row>
-        </v-col>
-        <v-col cols="4" class="pa-2 d-flex align-stretch">
-          <b-bar v-on:addResponse="addResponse"></b-bar>
-        </v-col>
-      </v-row>
+    <v-container class="pa-2" style="height:100%;">
+  
+        <div style="max-height: 100vh">
+          <Search></Search>
+        
+
+          <v-carousel
+            hide-delimiters
+            :show-arrows="false"
+            light
+            v-model="currentResponse"
+            class="mt-5"
+             style="max-height: 540px; height: 540px"
+          >
+            <Answer 
+              v-for="(response, index) in responses"
+              :breadCrumbs="breadCrumbs"
+              :index="index"
+              :name="names[index]"
+              :isIntent="index === 0"
+              :key="response.key"
+              ></Answer>
+          </v-carousel>
+        </div>
     </v-container>
   </v-app>
 </template>
@@ -132,10 +122,6 @@ export default {
     nextId: 0
   }),
   methods: {
-    addResponse(type) {
-      let pBus = this.pBuses[this.pBuses.length - 1];
-      pBus.$emit("newType", type);
-    },
     generateName(index) {
       let name = "";
       for (let i = 0; i <= index; ++i) {
@@ -156,5 +142,9 @@ export default {
 
 * {
   font-family: "Lato", sans-serif;
+  color: "#00E8FC"
 }
+$material-light: (
+  'background': black
+);
 </style>

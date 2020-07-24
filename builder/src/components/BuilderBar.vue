@@ -1,5 +1,5 @@
 <template>
-    <v-card class="pl-5 pr-5">
+    <v-card class="pl-5 pr-5" outlined>
         <v-row>
             <h3>Skladač správ</h3>
         </v-row>

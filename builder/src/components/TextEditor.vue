@@ -1,6 +1,6 @@
 <template>
     <v-card>
-        <v-card-title>
+        <v-card-title class="primary--text">
           <span class="headline">Textová správa</span>
         </v-card-title>
         <v-card-text>
@@ -20,7 +20,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn class="ma-2" outlined color="red" text @click="closeDialog(false)">Zrušiť</v-btn>
-          <v-btn class="ma-2" color="blue" outlined text @click="closeDialog(true)">Ok</v-btn>
+          <v-btn class="ma-2" color="primary" outlined text @click="closeDialog(true)">Ok</v-btn>
         </v-card-actions>
       </v-card>
 </template>

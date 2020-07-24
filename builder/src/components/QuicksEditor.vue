@@ -1,6 +1,6 @@
 <template>
     <v-card>
-        <v-card-title>
+        <v-card-title class="primary--text">
           <span class="headline">Rýchle odpovede</span>
         </v-card-title>
         <v-card-text>
@@ -28,7 +28,7 @@
                     ></v-text-field>
                 </v-row>
                 <v-row>
-                    <v-btn color="blue" width="190" outlined @click="editQuick(btn)">Upraviť reakciu</v-btn>
+                    <v-btn color="primary" width="190" outlined @click="editQuick(btn)">Upraviť reakciu</v-btn>
                 </v-row>
                 <v-row class="mt-2" v-if="index > 0">
                     <v-btn width="190" outlined color="red" text @click="remove(index)">Zmazať reakciu</v-btn>
@@ -36,8 +36,8 @@
             </v-col>
             <v-col lg="3" justify-center align-center>
                 <v-row fill-height>
-                    <v-btn color="blue" class="ma-12" outlined @click="addQuick">
-                        <v-icon color="blue">mdi-plus</v-icon>
+                    <v-btn color="primary" class="ma-12" outlined @click="addQuick">
+                        <v-icon color="primary">mdi-plus</v-icon>
                     </v-btn>
                 </v-row>
             </v-col>
@@ -47,7 +47,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn class="ma-2" outlined color="red" text @click="closeDialog(false)">Zrušiť</v-btn>
-          <v-btn class="ma-2" color="blue" outlined text @click="closeDialog(true)">Ok</v-btn>
+          <v-btn class="ma-2" color="primary" outlined text @click="closeDialog(true)">Ok</v-btn>
         </v-card-actions>
       </v-card>
 </template>
