@@ -3,13 +3,13 @@
         <div class="text-response">
             {{ msg.value }}
         </div>
-        <v-tooltip right>
+        <v-tooltip bottom v-for="btn in msg.options" :key="btn.url">
             <template v-slot:activator="{ on, attrs }">
                 <div class="button click" v-bind="attrs" v-on="on">
-                    {{ msg.options.title }}
+                    {{ btn.title }}
                 </div>
             </template>
-            <span>{{ msg.options.url }}</span>
+            <span>{{ btn.url }}</span>
         </v-tooltip>
     </div>
 </template>
@@ -29,6 +29,7 @@ export default {
     font-size: 14px;
     text-align: center;
     display: inline-block;
+    margin: 4px 4px;
 }
 
 .text-response {

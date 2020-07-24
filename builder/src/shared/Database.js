@@ -69,13 +69,13 @@ class Databaseclass {
                 case "url":
                     serialized.type = "buttons";
                     btns = [];
-                    //msg.options.forEach(btn => {
+                    msg.options.forEach(btn => {
                         btns.push({
-                            title: msg.options.title,
+                            title: btn.title,
                             type: "web_url",
-                            url: msg.options.url
+                            url: btn.url
                         });
-                    //});
+                    });
                     serialized.options = {
                         btns: btns
                     }
@@ -117,11 +117,14 @@ class Databaseclass {
                         serialized.options = quicks;
                     } else  { // URL
                         serialized.type = "url";
-                        let url = {
-                            title: btns[0].title,
-                            url: btns[0].url
-                        }
-                        serialized.options = url;
+                        let urls = []
+                        btns.forEach(btn => {
+                            urls.push({
+                                title: btn.title,
+                                url: btn.url
+                            });
+                        });
+                        serialized.options = urls;
                     }
                     break;
                 case "text":
