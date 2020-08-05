@@ -5,7 +5,7 @@
                 <h3>Zvoľ si akú odpoveď chceš editovať</h3>
             </v-col>
             <v-col lg="5">   
-                <v-autocomplete spellcheck="false" v-model="current" dense :items='options' @change="selectIntent" label="Názov intentu" class="primary--text">
+                <v-autocomplete no-data-text="Nič som nenašiel" spellcheck="false" v-model="current" dense :items='options' @change="selectIntent" label="Názov intentu" class="primary--text">
                     
                 </v-autocomplete>
             </v-col>
